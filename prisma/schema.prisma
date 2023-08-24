@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model usuarios {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  apellido  String
+  correo    String
+  telefono  String?
+  clave     String
+  activo    Boolean  @default(true)
+  fech_crea DateTime @default(now())
+  fech_act  DateTime
+
+  @@unique([correo])
+}
+
+model categorias {
+  id        Int         @id @default(autoincrement())
+  nombre   String
+  producto  productos[]
+  activo    Boolean     @default(true)
+  fech_crea DateTime    @default(now())
+  fech_act  DateTime    
+}
+
+model productos {
+  id           Int            @id @default(autoincrement())
+  nombre       String
+  categoria    categorias     @relation(fields: [categoriaId], references: [id])
+  categoriaId  Int
+  pedido        pedidos[]
+  precioCompra Float
+  precioVenta  Float
+  descripcion  String
+  referencia   String
+  activo       Boolean        @default(true)
+  fech_crea    DateTime       @default(now())
+  fech_act     DateTime
+  pedidosItems pedidosItems[]
+}
+
+model clientes {
+  id            Int      @id @default(autoincrement())
+  tipoDocumento String
+  noDocumento   String
+  nombre        String
+  cliente       pedidos[]
+  apellido      String
+  correo        String
+  direccion     String?
+  telefono      String?
+  nota          String?
+  activo        Boolean  @default(true)
+  fech_crea     DateTime @default(now())
+  fech_act      DateTime
+
+  @@unique([correo])
+}
+
+model pedidos {
+  id        Int            @id @default(autoincrement())
+  items     pedidosItems[]
+  cliente   clientes @relation(fields: [clienteId], references: [id])
+  clienteId Int
+  producto productos @relation(fields: [productoId], references: [id])
+  productoId Int 
+  fech_crea DateTime       @default(now())
+  fech_act  DateTime
+}
+
+model pedidosItems {
+  id        Int       @id @default(autoincrement())
+  pedido    pedidos   @relation(fields: [pedidoId], references: [id])
+  pedidoId  Int
+  producto  productos @relation(fields: [prodId], references: [id])
+  prodId    Int
+  fech_crea DateTime  @default(now())
+  fech_act  DateTime
+}
